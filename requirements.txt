@@ -1,0 +1,8 @@
+pyTelegramBotAPI
+Flask
+pymongo
+requests
+aiohttp
+async-timeout
+urllib3
+colorama
