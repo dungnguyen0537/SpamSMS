@@ -13,12 +13,9 @@ from flask import Flask
 import requests
 
 # CONFIG - ĐIỀU CHỈNH CHO PHÙ HỢP VỚI MÁY TÍNH
-TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN')
+TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '8669337116:AAGo6urkWzXSb0vWUWlpVytf2DJiF932pYI')
 if not TOKEN or ':' not in TOKEN:
-    # Nếu chạy trên máy tính cá nhân, có thể nhập trực tiếp
-    TOKEN = input("Nhap TELEGRAM_BOT_TOKEN cua ban: ").strip()
-    if not TOKEN or ':' not in TOKEN:
-        raise ValueError("Thieu hoac sai TELEGRAM_BOT_TOKEN")
+    raise ValueError("Thiếu hoặc sai TELEGRAM_BOT_TOKEN")
 
 bot = telebot.TeleBot(TOKEN)
 
