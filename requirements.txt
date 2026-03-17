@@ -6,3 +6,4 @@ aiohttp
 async-timeout
 urllib3
 colorama
+psutil
